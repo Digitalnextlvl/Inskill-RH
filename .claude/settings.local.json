@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd C:/NextLevel/Inskill-RH && echo \"y\" | npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --no-git 2>&1)",
+      "Bash(cd C:/NextLevel/Inskill-RH && npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --no-git --yes 2>&1)",
+      "Bash(cp -r C:/NextLevel/inskill-rh-temp/. C:/NextLevel/Inskill-RH/ && ls C:/NextLevel/Inskill-RH/)",
+      "Bash(cd C:/NextLevel/Inskill-RH && npm install recharts lucide-react clsx 2>&1)",
+      "Bash(mkdir -p C:/NextLevel/Inskill-RH/src/components && mkdir -p C:/NextLevel/Inskill-RH/src/lib)",
+      "Bash(cd C:/NextLevel/Inskill-RH && node -e \"const r = require\\('./node_modules/recharts/package.json'\\); console.log\\(r.version\\)\")",
+      "Bash(cd C:/NextLevel/Inskill-RH && npm run build 2>&1)"
+    ]
+  }
+}

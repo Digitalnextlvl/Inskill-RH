@@ -2,6 +2,7 @@
 
 import { SCALE_LABELS } from "@/lib/questions";
 import { clsx } from "clsx";
+import { ArrowLeft } from "lucide-react";
 
 interface Props {
   stepLabel: string;
@@ -15,38 +16,21 @@ interface Props {
   canGoBack?: boolean;
 }
 
-interface ScaleButtonColors {
-  base: string;
-  hover: string;
-  selected: string;
-}
+/* Color system for 1-5 scale */
+const SCALE_COLORS: Record<number, { fill: string; border: string; glow: string; text: string }> = {
+  1: { fill: "rgba(239,68,68,0.2)",   border: "#EF4444", glow: "rgba(239,68,68,0.25)",   text: "#FCA5A5" },
+  2: { fill: "rgba(249,115,22,0.2)",  border: "#F97316", glow: "rgba(249,115,22,0.25)",  text: "#FDBA74" },
+  3: { fill: "rgba(234,179,8,0.2)",   border: "#EAB308", glow: "rgba(234,179,8,0.25)",   text: "#FDE047" },
+  4: { fill: "rgba(34,211,238,0.2)",  border: "#22D3EE", glow: "rgba(34,211,238,0.25)",  text: "#67E8F9" },
+  5: { fill: "rgba(124,58,237,0.25)", border: "#7C3AED", glow: "rgba(124,58,237,0.35)",  text: "#A78BFA" },
+};
 
-const SCALE_STYLES: Record<number, ScaleButtonColors> = {
-  1: {
-    base: "border-white/10 bg-white/5 text-slate-500",
-    hover: "hover:border-red-500/50 hover:bg-red-500/10 hover:text-red-400",
-    selected: "border-red-400 bg-red-500/25 text-red-300 shadow-lg shadow-red-500/20 scale-105",
-  },
-  2: {
-    base: "border-white/10 bg-white/5 text-slate-500",
-    hover: "hover:border-orange-500/50 hover:bg-orange-500/10 hover:text-orange-400",
-    selected: "border-orange-400 bg-orange-500/25 text-orange-300 shadow-lg shadow-orange-500/20 scale-105",
-  },
-  3: {
-    base: "border-white/10 bg-white/5 text-slate-500",
-    hover: "hover:border-yellow-500/50 hover:bg-yellow-500/10 hover:text-yellow-400",
-    selected: "border-yellow-400 bg-yellow-500/25 text-yellow-300 shadow-lg shadow-yellow-500/20 scale-105",
-  },
-  4: {
-    base: "border-white/10 bg-white/5 text-slate-500",
-    hover: "hover:border-cyan-500/50 hover:bg-cyan-500/10 hover:text-cyan-400",
-    selected: "border-cyan-400 bg-cyan-500/25 text-cyan-300 shadow-lg shadow-cyan-500/20 scale-105",
-  },
-  5: {
-    base: "border-white/10 bg-white/5 text-slate-500",
-    hover: "hover:border-indigo-500/50 hover:bg-indigo-500/10 hover:text-indigo-400",
-    selected: "border-indigo-400 bg-indigo-500/25 text-indigo-300 shadow-lg shadow-indigo-500/20 scale-105",
-  },
+const SCALE_LEGEND_COLORS: Record<number, string> = {
+  1: "#EF4444",
+  2: "#F97316",
+  3: "#EAB308",
+  4: "#22D3EE",
+  5: "#7C3AED",
 };
 
 export default function QuestionStep({
@@ -60,41 +44,62 @@ export default function QuestionStep({
   onBack,
   canGoBack = true,
 }: Props) {
-  const allAnswered = answers.every((a) => a > 0);
+  const allAnswered   = answers.every((a) => a > 0);
   const answeredCount = answers.filter((a) => a > 0).length;
+  const pct           = Math.round((answeredCount / questions.length) * 100);
 
   return (
     <div className="w-full max-w-3xl mx-auto">
-      <div className="glass-card rounded-2xl p-8">
+      <div
+        className="glass-card p-8"
+        style={{ borderRadius: "var(--radius-xl)" }}
+      >
+
+        {/* Header */}
         <div className="mb-8">
-          <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 mb-4">
-            {stepLabel}
-          </span>
-          <h2 className="text-2xl font-bold text-white mb-2">{title}</h2>
-          {subtitle && <p className="text-slate-400 text-sm">{subtitle}</p>}
+          <span className="step-badge mb-4 inline-flex">{stepLabel}</span>
+          <h2
+            className="text-2xl font-bold mb-1.5"
+            style={{ color: "var(--text)" }}
+          >
+            {title}
+          </h2>
+          {subtitle && (
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+              {subtitle}
+            </p>
+          )}
         </div>
 
         {/* Scale legend */}
-        <div className="mb-8 p-4 rounded-xl bg-white/[0.03] border border-white/[0.07]">
-          <p className="text-xs font-semibold text-slate-500 mb-3 uppercase tracking-wider">
+        <div
+          className="mb-8 p-4 rounded-xl"
+          style={{
+            background: "rgba(255,255,255,0.02)",
+            border: "1px solid rgba(255,255,255,0.05)",
+            borderRadius: "var(--radius-md)",
+          }}
+        >
+          <p
+            className="text-xs font-bold mb-3 uppercase tracking-widest"
+            style={{ color: "var(--text-dim)" }}
+          >
             Escala de avaliação
           </p>
-          <div className="flex flex-col gap-1.5 sm:flex-row sm:gap-3">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-x-5 sm:gap-y-1.5">
             {[1, 2, 3, 4, 5].map((val) => (
               <div key={val} className="flex items-center gap-2">
                 <span
-                  className={clsx(
-                    "flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold",
-                    val === 1 && "bg-red-500/30 text-red-300",
-                    val === 2 && "bg-orange-500/30 text-orange-300",
-                    val === 3 && "bg-yellow-500/30 text-yellow-300",
-                    val === 4 && "bg-cyan-500/30 text-cyan-300",
-                    val === 5 && "bg-indigo-500/30 text-indigo-300"
-                  )}
+                  className="shrink-0 w-5 h-5 rounded flex items-center justify-center text-xs font-bold"
+                  style={{
+                    background: `${SCALE_LEGEND_COLORS[val]}22`,
+                    color: SCALE_LEGEND_COLORS[val],
+                    border: `1px solid ${SCALE_LEGEND_COLORS[val]}44`,
+                  }}
                 >
                   {val}
                 </span>
-                <span className="text-xs text-slate-500 leading-tight">
+                <span className="text-xs" style={{ color: "var(--text-muted)" }}>
                   {SCALE_LABELS[val]}
                 </span>
               </div>
@@ -102,29 +107,45 @@ export default function QuestionStep({
           </div>
         </div>
 
-        {/* Questions */}
-        <div className="space-y-7">
+        {/* Questions list */}
+        <div className="space-y-8">
           {questions.map((question, idx) => {
-            const currentAnswer = answers[idx];
+            const current = answers[idx];
+            const answered = current > 0;
+
             return (
               <div key={idx}>
+                {/* Question row */}
                 <div className="flex items-start gap-3 mb-3">
+                  {/* Number bubble */}
                   <span
-                    className={clsx(
-                      "flex-shrink-0 w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center mt-0.5 transition-colors duration-200",
-                      currentAnswer > 0
-                        ? "bg-indigo-500/30 border border-indigo-400/50 text-indigo-300"
-                        : "bg-white/8 border border-white/15 text-slate-500"
-                    )}
+                    className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold mt-0.5 transition-all duration-200"
+                    style={{
+                      background: answered
+                        ? "linear-gradient(135deg, var(--primary), var(--accent))"
+                        : "rgba(255,255,255,0.05)",
+                      border: answered
+                        ? "none"
+                        : "1px solid rgba(255,255,255,0.12)",
+                      color: answered ? "#fff" : "var(--text-dim)",
+                      boxShadow: answered ? "var(--shadow-glow-sm)" : "none",
+                    }}
                   >
                     {idx + 1}
                   </span>
-                  <p className="text-sm text-slate-200 leading-relaxed">{question}</p>
+                  <p
+                    className="text-sm leading-relaxed"
+                    style={{ color: answered ? "var(--text)" : "var(--text-muted)" }}
+                  >
+                    {question}
+                  </p>
                 </div>
-                <div className="flex gap-2 ml-9">
+
+                {/* Rating buttons */}
+                <div className="flex gap-2 ml-10">
                   {[1, 2, 3, 4, 5].map((val) => {
-                    const isSelected = currentAnswer === val;
-                    const styles = SCALE_STYLES[val];
+                    const isSelected = current === val;
+                    const c = SCALE_COLORS[val];
                     return (
                       <button
                         key={val}
@@ -132,21 +153,50 @@ export default function QuestionStep({
                         title={SCALE_LABELS[val]}
                         aria-label={`${val} — ${SCALE_LABELS[val]}`}
                         aria-pressed={isSelected}
-                        className={clsx(
-                          "flex-1 h-11 rounded-lg border text-sm font-bold transition-all duration-150",
+                        className="flex-1 h-11 rounded-lg text-sm font-bold transition-all duration-150"
+                        style={
                           isSelected
-                            ? styles.selected
-                            : `${styles.base} ${styles.hover}`
-                        )}
+                            ? {
+                                background: c.fill,
+                                border: `1.5px solid ${c.border}`,
+                                color: c.text,
+                                boxShadow: `0 0 14px ${c.glow}`,
+                                transform: "scale(1.06)",
+                              }
+                            : {
+                                background: "rgba(255,255,255,0.03)",
+                                border: "1px solid rgba(255,255,255,0.09)",
+                                color: "var(--text-dim)",
+                              }
+                        }
+                        onMouseEnter={(e) => {
+                          if (!isSelected) {
+                            (e.currentTarget as HTMLButtonElement).style.background = c.fill.replace("0.2", "0.1").replace("0.25", "0.12");
+                            (e.currentTarget as HTMLButtonElement).style.borderColor = `${c.border}66`;
+                            (e.currentTarget as HTMLButtonElement).style.color = c.text;
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isSelected) {
+                            (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.03)";
+                            (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.09)";
+                            (e.currentTarget as HTMLButtonElement).style.color = "var(--text-dim)";
+                          }
+                        }}
                       >
                         {val}
                       </button>
                     );
                   })}
                 </div>
-                {currentAnswer > 0 && (
-                  <p className="ml-9 mt-1.5 text-xs text-slate-500 italic">
-                    {SCALE_LABELS[currentAnswer]}
+
+                {/* Answer label */}
+                {answered && (
+                  <p
+                    className="ml-10 mt-1.5 text-xs italic"
+                    style={{ color: SCALE_COLORS[current].text, opacity: 0.8 }}
+                  >
+                    {SCALE_LABELS[current]}
                   </p>
                 )}
               </div>
@@ -154,39 +204,50 @@ export default function QuestionStep({
           })}
         </div>
 
-        {/* Progress indicator */}
-        <div className="mt-8 mb-6">
-          <div className="flex justify-between text-xs text-slate-500 mb-1.5">
-            <span>{answeredCount} de {questions.length} respondidas</span>
-            <span>{Math.round((answeredCount / questions.length) * 100)}%</span>
+        {/* Completion progress */}
+        <div className="mt-10 mb-6">
+          <div
+            className="flex justify-between mb-2 text-xs font-semibold"
+            style={{ color: "var(--text-dim)" }}
+          >
+            <span>
+              {answeredCount} de {questions.length} respondidas
+            </span>
+            <span style={{ color: pct === 100 ? "var(--accent)" : "var(--text-muted)" }}>
+              {pct}%
+            </span>
           </div>
-          <div className="h-1 bg-white/10 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-indigo-500 to-cyan-500 rounded-full transition-all duration-300"
-              style={{ width: `${(answeredCount / questions.length) * 100}%` }}
-            />
+          <div className="progress-track">
+            <div className="progress-fill" style={{ width: `${pct}%` }} />
           </div>
         </div>
+
+        {/* Divider */}
+        <div
+          className="mb-6"
+          style={{
+            height: "1px",
+            background: "linear-gradient(90deg, transparent, var(--border), transparent)",
+          }}
+        />
 
         {/* Navigation */}
         <div className="flex gap-3">
           {canGoBack && (
             <button
               onClick={onBack}
-              className="px-6 py-3 rounded-xl font-semibold text-sm text-slate-400 bg-white/5 border border-white/10 hover:bg-white/10 hover:text-slate-200 transition-all duration-200"
+              className="btn-ghost"
+              style={{ gap: "0.4rem" }}
             >
-              ← Voltar
+              <ArrowLeft size={14} />
+              Voltar
             </button>
           )}
           <button
             onClick={onNext}
             disabled={!allAnswered}
-            className={clsx(
-              "flex-1 py-3 rounded-xl font-semibold text-sm transition-all duration-200",
-              allAnswered
-                ? "bg-gradient-to-r from-indigo-600 to-cyan-600 text-white hover:from-indigo-500 hover:to-cyan-500 shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-[1.01]"
-                : "bg-white/5 text-slate-600 cursor-not-allowed border border-white/5"
-            )}
+            className={clsx("btn-primary flex-1", !allAnswered && "opacity-50")}
+            style={allAnswered ? {} : { background: "rgba(255,255,255,0.06)", boxShadow: "none" }}
           >
             {allAnswered
               ? "Continuar →"

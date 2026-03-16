@@ -8,9 +8,14 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
-import { ScoreResult, LEVEL_COLORS, LEVEL_DESCRIPTIONS, getPillarFeedback } from "@/lib/scoring";
+import {
+  ScoreResult,
+  LEVEL_COLORS,
+  LEVEL_DESCRIPTIONS,
+  getPillarFeedback,
+} from "@/lib/scoring";
 import { Qualification } from "@/lib/questions";
-import { clsx } from "clsx";
+import { RotateCcw, TrendingUp } from "lucide-react";
 
 interface Props {
   result: ScoreResult;
@@ -28,43 +33,99 @@ interface PillarCardProps {
 function PillarCard({ label, score, feedback, color }: PillarCardProps) {
   if (score === null) {
     return (
-      <div className="glass-card rounded-xl p-5 border border-white/10 opacity-40">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-sm font-semibold text-slate-400">{label}</span>
-          <span className="text-xs text-slate-500 bg-white/5 px-2 py-0.5 rounded-full">N/A</span>
+      <div
+        className="glass-card p-5"
+        style={{
+          borderRadius: "var(--radius-lg)",
+          opacity: 0.38,
+        }}
+      >
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-semibold" style={{ color: "var(--text-muted)" }}>
+            {label}
+          </span>
+          <span
+            className="text-xs px-2 py-0.5 rounded-full"
+            style={{
+              background: "rgba(255,255,255,0.05)",
+              color: "var(--text-dim)",
+            }}
+          >
+            N/A
+          </span>
         </div>
-        <p className="text-xs text-slate-500 italic">Não aplicável para o seu cargo.</p>
+        <p className="text-xs italic" style={{ color: "var(--text-dim)" }}>
+          Não aplicável para o seu cargo.
+        </p>
       </div>
     );
   }
 
-  const width = `${score}%`;
-
   return (
-    <div className="glass-card rounded-xl p-5 border border-white/10">
+    <div
+      className="glass-card p-5 transition-transform duration-200 hover:scale-[1.01]"
+      style={{
+        borderRadius: "var(--radius-lg)",
+        borderColor: `${color}30`,
+      }}
+    >
       <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-semibold text-slate-200">{label}</span>
-        <span className="text-xl font-bold" style={{ color }}>
+        <span className="text-sm font-semibold" style={{ color: "var(--text)" }}>
+          {label}
+        </span>
+        <span className="text-xl font-extrabold" style={{ color }}>
           {score}%
         </span>
       </div>
-      {/* Progress bar */}
-      <div className="h-1.5 bg-white/10 rounded-full mb-3 overflow-hidden">
+
+      {/* Gradient progress bar */}
+      <div
+        className="mb-3 overflow-hidden"
+        style={{
+          height: "5px",
+          borderRadius: "9999px",
+          background: "rgba(255,255,255,0.07)",
+        }}
+      >
         <div
-          className="h-full rounded-full transition-all duration-1000"
-          style={{ width, backgroundColor: color }}
+          style={{
+            height: "100%",
+            width: `${score}%`,
+            borderRadius: "9999px",
+            background: `linear-gradient(90deg, ${color}CC, ${color})`,
+            boxShadow: `0 0 8px ${color}55`,
+            transition: "width 1.2s cubic-bezier(0.4,0,0.2,1)",
+          }}
         />
       </div>
-      <p className="text-xs text-slate-400 leading-relaxed">{feedback}</p>
+
+      <p className="text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
+        {feedback}
+      </p>
     </div>
   );
 }
 
-const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ value: number; name: string }> }) => {
+const CustomTooltip = ({
+  active,
+  payload,
+}: {
+  active?: boolean;
+  payload?: Array<{ value: number }>;
+}) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-slate-900/90 border border-white/20 rounded-lg px-3 py-2 text-sm">
-        <p className="text-white font-semibold">{payload[0]?.value}%</p>
+      <div
+        className="px-3 py-2 text-sm rounded-lg"
+        style={{
+          background: "rgba(17,13,43,0.95)",
+          border: "1px solid var(--border)",
+          backdropFilter: "blur(8px)",
+        }}
+      >
+        <p className="font-bold" style={{ color: "var(--primary-light)" }}>
+          {payload[0]?.value}%
+        </p>
       </div>
     );
   }
@@ -73,147 +134,183 @@ const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<
 
 export default function Results({ result, qualification, onReset }: Props) {
   const { pillars, overall, level, isLeader } = result;
-  const feedback = getPillarFeedback(pillars);
+  const feedback   = getPillarFeedback(pillars);
   const levelColor = LEVEL_COLORS[level];
 
   const radarData = [
-    { subject: "Técnica", value: pillars.technical, fullMark: 100 },
-    { subject: "Digital", value: pillars.digital, fullMark: 100 },
-    { subject: "Comportamental", value: pillars.behavioral, fullMark: 100 },
-    { subject: "Gestão", value: pillars.management ?? 0, fullMark: 100 },
+    { subject: "Técnica",        value: pillars.technical,          fullMark: 100 },
+    { subject: "Digital",        value: pillars.digital,            fullMark: 100 },
+    { subject: "Comportamental", value: pillars.behavioral,         fullMark: 100 },
+    { subject: "Gestão",         value: pillars.management ?? 0,    fullMark: 100 },
   ];
 
+  const conicDeg = Math.round((overall / 100) * 360);
+
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-8 pb-12">
-      {/* Header / Level Badge */}
-      <div className="glass-card rounded-2xl p-8 text-center">
-        <p className="text-slate-400 text-sm mb-2">
+    <div
+      className="w-full max-w-4xl mx-auto pb-14"
+      style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}
+    >
+
+      {/* ── Score hero card ── */}
+      <div
+        className="glass-card p-8 text-center"
+        style={{ borderRadius: "var(--radius-xl)" }}
+      >
+        <p
+          className="text-xs uppercase font-bold tracking-widest mb-1"
+          style={{ color: "var(--text-dim)" }}
+        >
           {qualification.cargo} · {qualification.area}
         </p>
-        <h2 className="text-3xl font-bold text-white mb-6">Seu Resultado</h2>
+        <h2
+          className="text-2xl font-extrabold mb-8"
+          style={{ color: "var(--text)" }}
+        >
+          Seu Resultado
+        </h2>
 
-        {/* Overall score circle */}
-        <div className="flex items-center justify-center mb-6">
+        {/* Score ring */}
+        <div className="flex justify-center mb-7">
           <div
-            className="relative w-36 h-36 rounded-full flex items-center justify-center"
+            className="relative flex items-center justify-center"
             style={{
-              background: `conic-gradient(${levelColor} ${overall * 3.6}deg, rgba(255,255,255,0.05) 0deg)`,
+              width: "9rem",
+              height: "9rem",
+              borderRadius: "50%",
+              background: `conic-gradient(${levelColor} ${conicDeg}deg, rgba(255,255,255,0.06) 0deg)`,
+              boxShadow: `0 0 32px ${levelColor}44`,
             }}
           >
-            <div className="w-28 h-28 rounded-full bg-slate-950 flex flex-col items-center justify-center">
-              <span className="text-3xl font-bold" style={{ color: levelColor }}>
+            {/* Inner circle */}
+            <div
+              className="flex flex-col items-center justify-center"
+              style={{
+                width: "7rem",
+                height: "7rem",
+                borderRadius: "50%",
+                background: "var(--surface-1)",
+              }}
+            >
+              <span className="text-3xl font-extrabold" style={{ color: levelColor, lineHeight: 1 }}>
                 {overall}%
               </span>
-              <span className="text-xs text-slate-500">geral</span>
+              <span className="text-xs mt-1" style={{ color: "var(--text-dim)" }}>
+                geral
+              </span>
             </div>
           </div>
         </div>
 
         {/* Level badge */}
         <div
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-full border-2 mb-4"
+          className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full mb-4"
           style={{
-            borderColor: levelColor,
-            backgroundColor: `${levelColor}18`,
+            border: `2px solid ${levelColor}`,
+            background: `${levelColor}18`,
+            boxShadow: `0 0 18px ${levelColor}22`,
           }}
         >
-          <span className="text-lg font-bold" style={{ color: levelColor }}>
+          <TrendingUp size={14} style={{ color: levelColor }} />
+          <span className="font-bold text-base" style={{ color: levelColor }}>
             {level}
           </span>
         </div>
 
-        <p className="text-slate-400 text-sm max-w-md mx-auto">
+        <p
+          className="text-sm max-w-md mx-auto"
+          style={{ color: "var(--text-muted)" }}
+        >
           {LEVEL_DESCRIPTIONS[level]}
         </p>
       </div>
 
-      {/* Radar Chart */}
-      <div className="glass-card rounded-2xl p-8">
-        <h3 className="text-lg font-bold text-white mb-6 text-center">
+      {/* ── Radar chart ── */}
+      <div
+        className="glass-card p-8"
+        style={{ borderRadius: "var(--radius-xl)" }}
+      >
+        <h3
+          className="text-base font-bold text-center mb-6 uppercase tracking-wider"
+          style={{ color: "var(--text-muted)" }}
+        >
           Mapa de Maturidade
         </h3>
-        <div className="h-72">
+
+        <div style={{ height: "17rem" }}>
           <ResponsiveContainer width="100%" height="100%">
-            <RadarChart data={radarData} margin={{ top: 10, right: 30, bottom: 10, left: 30 }}>
-              <PolarGrid stroke="rgba(255,255,255,0.1)" />
+            <RadarChart data={radarData} margin={{ top: 10, right: 40, bottom: 10, left: 40 }}>
+              <PolarGrid stroke="rgba(124,58,237,0.18)" />
               <PolarAngleAxis
                 dataKey="subject"
-                tick={{ fill: "#94a3b8", fontSize: 13, fontWeight: 600 }}
+                tick={{ fill: "#9E99C0", fontSize: 12, fontWeight: 600 }}
               />
               <Radar
                 name="Score"
                 dataKey="value"
-                stroke="#6366F1"
-                fill="#6366F1"
-                fillOpacity={0.25}
+                stroke="var(--primary)"
+                fill="var(--primary)"
+                fillOpacity={0.22}
                 strokeWidth={2}
-                dot={{ fill: "#6366F1", strokeWidth: 2, r: 4 }}
+                dot={{ fill: "var(--accent)", strokeWidth: 0, r: 4 }}
               />
               <Tooltip content={<CustomTooltip />} />
             </RadarChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Axis legend */}
-        <div className="grid grid-cols-2 gap-2 mt-4 sm:grid-cols-4">
-          {radarData.map((d) => (
-            <div
-              key={d.subject}
-              className={clsx(
-                "text-center p-2 rounded-lg",
-                d.subject === "Gestão" && !isLeader
-                  ? "opacity-30"
-                  : "bg-white/5"
-              )}
-            >
-              <p className="text-xs text-slate-400">{d.subject}</p>
-              <p className="text-base font-bold text-indigo-400">
-                {d.subject === "Gestão" && !isLeader ? "N/A" : `${d.value}%`}
-              </p>
-            </div>
-          ))}
+        {/* Radar axis summaries */}
+        <div className="grid grid-cols-2 gap-2 mt-5 sm:grid-cols-4">
+          {radarData.map((d) => {
+            const isNA = d.subject === "Gestão" && !isLeader;
+            return (
+              <div
+                key={d.subject}
+                className="text-center p-2.5 rounded-lg"
+                style={{
+                  background: isNA ? "rgba(255,255,255,0.02)" : "rgba(124,58,237,0.08)",
+                  border: "1px solid rgba(124,58,237,0.12)",
+                  opacity: isNA ? 0.35 : 1,
+                }}
+              >
+                <p className="text-xs mb-0.5" style={{ color: "var(--text-dim)" }}>
+                  {d.subject}
+                </p>
+                <p
+                  className="text-base font-bold"
+                  style={{ color: isNA ? "var(--text-dim)" : "var(--primary-light)" }}
+                >
+                  {isNA ? "N/A" : `${d.value}%`}
+                </p>
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* Pillar Score Cards */}
+      {/* ── Pillar cards ── */}
       <div>
-        <h3 className="text-lg font-bold text-white mb-4">
+        <h3
+          className="text-xs font-bold uppercase tracking-widest mb-4"
+          style={{ color: "var(--text-dim)" }}
+        >
           Análise por Pilar
         </h3>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <PillarCard
-            label="Técnica"
-            score={pillars.technical}
-            feedback={feedback.technical}
-            color="#06B6D4"
-          />
-          <PillarCard
-            label="Digital (IA)"
-            score={pillars.digital}
-            feedback={feedback.digital}
-            color="#8B5CF6"
-          />
-          <PillarCard
-            label="Comportamental"
-            score={pillars.behavioral}
-            feedback={feedback.behavioral}
-            color="#6366F1"
-          />
-          <PillarCard
-            label="Gestão"
-            score={pillars.management}
-            feedback={feedback.management}
-            color="#F59E0B"
-          />
+          <PillarCard label="Técnica"         score={pillars.technical}  feedback={feedback.technical}  color="#22D3EE" />
+          <PillarCard label="Digital (IA)"    score={pillars.digital}    feedback={feedback.digital}    color="#C084FC" />
+          <PillarCard label="Comportamental"  score={pillars.behavioral} feedback={feedback.behavioral} color="#7C3AED" />
+          <PillarCard label="Gestão"          score={pillars.management} feedback={feedback.management} color="#F59E0B" />
         </div>
       </div>
 
-      {/* Reset button */}
-      <div className="text-center">
+      {/* ── Reset CTA ── */}
+      <div className="text-center pt-4">
         <button
           onClick={onReset}
-          className="px-8 py-4 rounded-xl font-semibold text-base bg-white/5 border border-white/15 text-slate-300 hover:bg-white/10 hover:border-white/25 hover:text-white transition-all duration-200"
+          className="btn-ghost inline-flex gap-2"
         >
+          <RotateCcw size={14} />
           Refazer Avaliação
         </button>
       </div>

@@ -1,56 +1,213 @@
 @import "tailwindcss";
 
+/* ─────────────────────────────────────────
+   DESIGN TOKENS — Inskill HR Executive
+   Inspired by: Neolude / deep-violet dark tech
+───────────────────────────────────────── */
 :root {
-  --background: #0F0F1A;
-  --foreground: #e2e8f0;
+  /* Backgrounds */
+  --bg:          #0F0822;
+  --surface-1:   #1C1040;
+  --surface-2:   #261555;
+  --surface-3:   #321B6A;
+
+  /* Brand */
+  --primary:       #7C3AED;
+  --primary-light: #A78BFA;
+  --primary-dark:  #5B21B6;
+  --primary-glow:  rgba(124, 58, 237, 0.35);
+  --accent:        #C084FC;
+  --accent-cyan:   #22D3EE;
+
+  /* Text */
+  --text:       #F4F0FF;
+  --text-muted: #9E99C0;
+  --text-dim:   #5E5A80;
+
+  /* Borders */
+  --border:        rgba(124, 58, 237, 0.22);
+  --border-active: rgba(167, 139, 250, 0.55);
+  --border-subtle: rgba(255, 255, 255, 0.07);
+
+  /* Radii */
+  --radius-xl: 1.25rem;
+  --radius-lg: 1rem;
+  --radius-md: 0.75rem;
+  --radius-sm: 0.5rem;
+
+  /* Shadows */
+  --shadow-card:    0 8px 40px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.05) inset;
+  --shadow-primary: 0 0 24px rgba(124, 58, 237, 0.4);
+  --shadow-glow-sm: 0 0 12px rgba(124, 58, 237, 0.3);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--bg);
+  --color-foreground: var(--text);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+/* ─── Base ─── */
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background: rgba(124, 58, 237, 0.45);
+    color: #fff;
+  }
+
+  ::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(124, 58, 237, 0.35);
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(124, 58, 237, 0.6);
+  }
+
+  button {
+    cursor: pointer;
+  }
 }
 
-/* Glass morphism card */
-.glass-card {
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-}
+/* ─── Reusable components ─── */
+@layer components {
+  /* Glass card */
+  .glass-card {
+    background: rgba(15, 8, 34, 0.55);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(180, 130, 255, 0.18);
+    box-shadow: 0 12px 48px rgba(0,0,0,0.45), 0 1px 0 rgba(255,255,255,0.06) inset;
+  }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
+  /* Badge / pill label */
+  .step-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.85rem;
+    border-radius: 9999px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: rgba(124, 58, 237, 0.15);
+    color: var(--primary-light);
+    border: 1px solid rgba(124, 58, 237, 0.3);
+  }
 
-::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.02);
-}
+  /* Primary CTA button */
+  .btn-primary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 0.9rem 1.5rem;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #fff;
+    background: linear-gradient(135deg, var(--primary) 0%, #9333EA 100%);
+    border: none;
+    box-shadow: var(--shadow-primary);
+    transition: filter 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  }
 
-::-webkit-scrollbar-thumb {
-  background: rgba(99, 102, 241, 0.4);
-  border-radius: 3px;
-}
+  .btn-primary:hover:not(:disabled) {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: 0 0 32px rgba(124, 58, 237, 0.55);
+  }
 
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(99, 102, 241, 0.6);
-}
+  .btn-primary:active:not(:disabled) {
+    transform: translateY(0);
+  }
 
-/* Selection */
-::selection {
-  background: rgba(99, 102, 241, 0.4);
-  color: white;
-}
+  .btn-primary:disabled {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-dim);
+    box-shadow: none;
+    cursor: not-allowed;
+  }
 
-button {
-  cursor: pointer;
+  /* Secondary / ghost button */
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-subtle);
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .btn-ghost:hover {
+    background: rgba(124, 58, 237, 0.1);
+    color: var(--primary-light);
+    border-color: var(--border);
+  }
+
+  /* Option chip */
+  .option-chip {
+    padding: 0.7rem 0.75rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-align: left;
+    border: 1px solid var(--border-subtle);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-muted);
+    transition: all 0.18s ease;
+  }
+
+  .option-chip:hover {
+    background: rgba(124, 58, 237, 0.1);
+    border-color: var(--border);
+    color: var(--text);
+  }
+
+  .option-chip.selected {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.25), rgba(147, 51, 234, 0.12));
+    border-color: var(--border-active);
+    color: #fff;
+    box-shadow: 0 0 12px rgba(124, 58, 237, 0.22), inset 0 1px 0 rgba(167, 139, 250, 0.1);
+  }
+
+  /* Progress bar track */
+  .progress-track {
+    height: 3px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 9999px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 9999px;
+    background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 }

@@ -2,11 +2,31 @@
 
 import { AREAS, CARGOS, COMPANY_SIZES, Qualification } from "@/lib/questions";
 import { clsx } from "clsx";
+import { Sparkles } from "lucide-react";
 
 interface Props {
   qualification: Qualification;
   onChange: (q: Qualification) => void;
   onNext: () => void;
+}
+
+interface SelectGroupProps {
+  label: string;
+  children: React.ReactNode;
+}
+
+function SelectGroup({ label, children }: SelectGroupProps) {
+  return (
+    <div className="mb-7">
+      <label
+        className="block mb-3 text-xs font-bold uppercase tracking-widest"
+        style={{ color: "var(--text-muted)" }}
+      >
+        {label}
+      </label>
+      {children}
+    </div>
+  );
 }
 
 export default function QualificationStep({ qualification, onChange, onNext }: Props) {
@@ -17,98 +37,118 @@ export default function QualificationStep({ qualification, onChange, onNext }: P
 
   return (
     <div className="w-full max-w-2xl mx-auto">
-      <div className="glass-card rounded-2xl p-8">
+      <div
+        className="glass-card rounded-2xl p-8"
+        style={{ borderRadius: "var(--radius-xl)" }}
+      >
+        {/* Header */}
         <div className="mb-8">
-          <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 mb-4">
-            ETAPA 0 — QUALIFICAÇÃO
+          <span className="step-badge mb-4 inline-flex">
+            Etapa 0 — Qualificação
           </span>
-          <h2 className="text-2xl font-bold text-white mb-2">Sobre você</h2>
-          <p className="text-slate-400 text-sm">
+          <h2
+            className="text-2xl font-bold mb-2"
+            style={{ color: "var(--text)" }}
+          >
+            Sobre você
+          </h2>
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
             Essas informações personalizam sua avaliação.
           </p>
         </div>
 
-        {/* Q0.1 — Area */}
-        <div className="mb-8">
-          <label className="block text-sm font-semibold text-slate-300 mb-3">
-            Área principal de atuação
-          </label>
+        {/* Divider */}
+        <div
+          className="mb-7"
+          style={{
+            height: "1px",
+            background: "linear-gradient(90deg, var(--border), transparent)",
+          }}
+        />
+
+        {/* Area */}
+        <SelectGroup label="Área principal de atuação">
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {AREAS.map((area) => (
               <button
                 key={area}
                 onClick={() => onChange({ ...qualification, area })}
                 className={clsx(
-                  "px-3 py-3 rounded-xl text-sm font-medium transition-all duration-200 text-left border",
-                  qualification.area === area
-                    ? "bg-indigo-600/80 border-indigo-400 text-white shadow-lg shadow-indigo-500/20"
-                    : "bg-white/5 border-white/10 text-slate-400 hover:bg-white/10 hover:border-white/20 hover:text-slate-200"
+                  "option-chip text-left",
+                  qualification.area === area && "selected"
                 )}
               >
                 {area}
               </button>
             ))}
           </div>
-        </div>
+        </SelectGroup>
 
-        {/* Q0.2 — Cargo */}
-        <div className="mb-8">
-          <label className="block text-sm font-semibold text-slate-300 mb-3">
-            Cargo atual
-          </label>
+        {/* Cargo */}
+        <SelectGroup label="Cargo atual">
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {CARGOS.map((cargo) => (
               <button
                 key={cargo}
                 onClick={() => onChange({ ...qualification, cargo })}
                 className={clsx(
-                  "px-3 py-3 rounded-xl text-sm font-medium transition-all duration-200 text-left border",
-                  qualification.cargo === cargo
-                    ? "bg-indigo-600/80 border-indigo-400 text-white shadow-lg shadow-indigo-500/20"
-                    : "bg-white/5 border-white/10 text-slate-400 hover:bg-white/10 hover:border-white/20 hover:text-slate-200"
+                  "option-chip text-left",
+                  qualification.cargo === cargo && "selected"
                 )}
               >
                 {cargo}
               </button>
             ))}
           </div>
-        </div>
+        </SelectGroup>
 
-        {/* Q0.3 — Company size */}
-        <div className="mb-8">
-          <label className="block text-sm font-semibold text-slate-300 mb-3">
-            Tamanho da empresa
-          </label>
+        {/* Company size */}
+        <SelectGroup label="Tamanho da empresa">
           <div className="flex flex-col gap-2 sm:flex-row">
             {COMPANY_SIZES.map((size) => (
               <button
                 key={size}
                 onClick={() => onChange({ ...qualification, companySize: size })}
                 className={clsx(
-                  "flex-1 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 border",
-                  qualification.companySize === size
-                    ? "bg-indigo-600/80 border-indigo-400 text-white shadow-lg shadow-indigo-500/20"
-                    : "bg-white/5 border-white/10 text-slate-400 hover:bg-white/10 hover:border-white/20 hover:text-slate-200"
+                  "option-chip flex-1 text-center",
+                  qualification.companySize === size && "selected"
                 )}
               >
                 {size}
               </button>
             ))}
           </div>
-        </div>
+        </SelectGroup>
 
+        {/* Divider */}
+        <div
+          className="mb-7"
+          style={{
+            height: "1px",
+            background: "linear-gradient(90deg, transparent, var(--border), transparent)",
+          }}
+        />
+
+        {/* CTA */}
         <button
           onClick={onNext}
           disabled={!isComplete}
-          className={clsx(
-            "w-full py-4 rounded-xl font-semibold text-base transition-all duration-200",
-            isComplete
-              ? "bg-gradient-to-r from-indigo-600 to-cyan-600 text-white hover:from-indigo-500 hover:to-cyan-500 shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:scale-[1.01]"
-              : "bg-white/5 text-slate-600 cursor-not-allowed border border-white/5"
-          )}
+          className="btn-primary"
         >
+          {isComplete && (
+            <Sparkles size={16} className="mr-2" style={{ color: "rgba(255,255,255,0.8)" }} />
+          )}
           Iniciar Avaliação →
         </button>
+
+        {!isComplete && (
+          <p
+            className="text-center mt-3 text-xs"
+            style={{ color: "var(--text-dim)" }}
+          >
+            Preencha todos os campos para continuar
+          </p>
+        )}
       </div>
     </div>
   );

@@ -15,43 +15,36 @@ import QualificationStep from "./Qualification";
 import QuestionStep from "./QuestionStep";
 import Results from "./Results";
 import { clsx } from "clsx";
+import { CheckIcon } from "lucide-react";
 
 type Step = 0 | 1 | 2 | 3 | 4 | 5;
 
-const STEP_LABELS: Record<number, string> = {
-  0: "Qualificação",
-  1: "Técnico",
-  2: "Digital",
-  3: "Comportamental",
-  4: "Gestão",
-  5: "Resultado",
+const STEP_META: Record<number, { label: string; short: string }> = {
+  1: { label: "Competências Técnicas", short: "Técnico" },
+  2: { label: "Competências Digitais",  short: "Digital" },
+  3: { label: "Competências Comportamentais", short: "Comportamental" },
+  4: { label: "Competências de Gestão", short: "Gestão" },
 };
 
 function createEmptyAnswers(): AssessmentAnswers {
   return {
-    technical: Array(7).fill(0),
-    ai: Array(3).fill(0),
-    behavioral: Array(10).fill(0),
-    management: Array(10).fill(0),
+    technical:   Array(7).fill(0),
+    ai:          Array(3).fill(0),
+    behavioral:  Array(10).fill(0),
+    management:  Array(10).fill(0),
   };
 }
 
 export default function Assessment() {
-  const [step, setStep] = useState<Step>(0);
-  const [qualification, setQualification] = useState<Qualification>({
-    area: "",
-    cargo: "",
-    companySize: "",
-  });
-  const [answers, setAnswers] = useState<AssessmentAnswers>(createEmptyAnswers());
-  const [result, setResult] = useState<ScoreResult | null>(null);
-  const [animating, setAnimating] = useState(false);
+  const [step, setStep]               = useState<Step>(0);
+  const [qualification, setQualification] = useState<Qualification>({ area: "", cargo: "", companySize: "" });
+  const [answers, setAnswers]         = useState<AssessmentAnswers>(createEmptyAnswers());
+  const [result, setResult]           = useState<ScoreResult | null>(null);
+  const [animating, setAnimating]     = useState(false);
 
-  const leader = isLeader(qualification.cargo);
-
-  // Get effective step count for progress bar
-  const progressSteps = leader ? 5 : 4; // excluding results
-  const effectiveStep = leader ? step : step > 3 ? step - 1 : step;
+  const leader        = isLeader(qualification.cargo);
+  const totalSteps    = leader ? 4 : 3;
+  const effectiveStep = leader ? step - 1 : step > 3 ? step - 2 : step - 1;
 
   function transition(nextStep: Step) {
     setAnimating(true);
@@ -59,26 +52,17 @@ export default function Assessment() {
       setStep(nextStep);
       setAnimating(false);
       window.scrollTo({ top: 0, behavior: "smooth" });
-    }, 150);
+    }, 160);
   }
 
-  function handleQualificationNext() {
-    transition(1);
-  }
-
-  function handleTechnicalNext() {
-    transition(2);
-  }
-
-  function handleAINext() {
-    transition(3);
-  }
+  function handleQualificationNext() { transition(1); }
+  function handleTechnicalNext()     { transition(2); }
+  function handleAINext()            { transition(3); }
 
   function handleBehavioralNext() {
     if (leader) {
       transition(4);
     } else {
-      // Calculate results, skip step 4
       const res = calculateScores(answers, qualification.cargo);
       setResult(res);
       transition(5);
@@ -98,11 +82,7 @@ export default function Assessment() {
     transition(0);
   }
 
-  function updateAnswer(
-    pillar: keyof AssessmentAnswers,
-    index: number,
-    value: number
-  ) {
+  function updateAnswer(pillar: keyof AssessmentAnswers, index: number, value: number) {
     setAnswers((prev) => {
       const arr = [...prev[pillar]];
       arr[index] = value;
@@ -111,74 +91,143 @@ export default function Assessment() {
   }
 
   const showProgress = step > 0 && step < 5;
+  const stepNumbers  = leader ? [1, 2, 3, 4] : [1, 2, 3];
 
   return (
-    <div className="min-h-screen px-4 py-8">
-      {/* Header */}
-      <header className="text-center mb-10">
-        <div className="inline-flex items-center gap-2 mb-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center">
-            <span className="text-white font-bold text-xs">IH</span>
-          </div>
-          <span className="text-sm font-semibold text-slate-400 tracking-widest uppercase">
-            Inskill HR Executive
-          </span>
+    <div className="min-h-screen">
+
+      {/* ── Header ── */}
+      <header className="text-center mb-12">
+        {/* Logo */}
+        <div className="flex items-center justify-center mb-6">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/inspand-logo.png"
+            alt="Inspand"
+            style={{
+              height: "52px",
+              width: "auto",
+              objectFit: "contain",
+              filter: "brightness(0) invert(1)",
+            }}
+          />
         </div>
-        <h1 className="text-3xl font-extrabold text-white sm:text-4xl">
+
+        <h1
+          className="font-extrabold tracking-tight"
+          style={{
+            fontSize: "clamp(1.8rem, 4vw, 2.75rem)",
+            color: "var(--text)",
+            lineHeight: 1.15,
+          }}
+        >
           Avaliação de Maturidade em RH
         </h1>
-        <p className="text-slate-400 mt-2 text-sm">
+        <p className="mt-3 text-sm" style={{ color: "var(--text-muted)", maxWidth: "34rem", margin: "0.75rem auto 0" }}>
           Descubra seu nível de maturidade e acelere sua carreira em RH
         </p>
       </header>
 
-      {/* Progress bar */}
+      {/* ── Step progress ── */}
       {showProgress && (
-        <div className="max-w-3xl mx-auto mb-8">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-slate-400">
-              Etapa {effectiveStep} de {progressSteps}
-            </span>
-            <span className="text-xs font-medium text-indigo-400">
-              {STEP_LABELS[step]}
-            </span>
-          </div>
-          <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-cyan-500 transition-all duration-500"
-              style={{
-                width: `${(effectiveStep / progressSteps) * 100}%`,
-              }}
-            />
-          </div>
-          {/* Step dots */}
-          <div className="flex justify-between mt-3">
-            {Array.from({ length: progressSteps }, (_, i) => i + 1).map((s) => (
-              <div
-                key={s}
-                className={clsx(
-                  "flex flex-col items-center gap-1",
-                )}
-              >
-                <div
-                  className={clsx(
-                    "w-2 h-2 rounded-full transition-all duration-300",
-                    effectiveStep >= s
-                      ? "bg-indigo-400 scale-125"
-                      : "bg-white/20"
+        <div className="max-w-2xl mx-auto mb-10 px-2">
+          {/* Step pills row */}
+          <div className="flex items-center justify-center gap-0 mb-5">
+            {stepNumbers.map((s, i) => {
+              const done    = effectiveStep > i;
+              const active  = effectiveStep === i;
+              const stepKey = leader ? s : s;
+              const meta    = STEP_META[stepKey];
+
+              return (
+                <div key={s} className="flex items-center">
+                  {/* Connector line (before first pill is hidden) */}
+                  {i > 0 && (
+                    <div
+                      style={{
+                        width: "3.5rem",
+                        height: "1px",
+                        background: done || active
+                          ? "linear-gradient(90deg, var(--primary), var(--primary-light))"
+                          : "rgba(255,255,255,0.1)",
+                        transition: "background 0.4s ease",
+                      }}
+                    />
                   )}
-                />
-              </div>
-            ))}
+
+                  {/* Pill */}
+                  <div className="flex flex-col items-center gap-1.5">
+                    <div
+                      className="flex items-center justify-center rounded-full text-xs font-bold transition-all duration-300"
+                      style={{
+                        width: "2.25rem",
+                        height: "2.25rem",
+                        background: done
+                          ? "linear-gradient(135deg, var(--primary), var(--accent))"
+                          : active
+                          ? "linear-gradient(135deg, var(--primary), #9333EA)"
+                          : "rgba(255,255,255,0.05)",
+                        border: active
+                          ? "2px solid var(--primary-light)"
+                          : done
+                          ? "2px solid transparent"
+                          : "2px solid rgba(255,255,255,0.12)",
+                        color: done || active ? "#fff" : "var(--text-dim)",
+                        boxShadow: active ? "var(--shadow-glow-sm)" : "none",
+                        transform: active ? "scale(1.1)" : "scale(1)",
+                      }}
+                    >
+                      {done ? <CheckIcon size={13} strokeWidth={3} /> : i + 1}
+                    </div>
+                    <span
+                      className="hidden sm:block text-center"
+                      style={{
+                        fontSize: "0.6rem",
+                        fontWeight: 600,
+                        letterSpacing: "0.05em",
+                        textTransform: "uppercase",
+                        color: active ? "var(--primary-light)" : done ? "var(--text-muted)" : "var(--text-dim)",
+                        maxWidth: "5rem",
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {meta?.short}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Active step label + progress bar */}
+          <div className="flex items-center justify-between mb-2">
+            <span
+              className="text-xs font-semibold uppercase tracking-widest"
+              style={{ color: "var(--text-dim)" }}
+            >
+              Etapa {Math.max(1, effectiveStep + 1)} de {totalSteps}
+            </span>
+            <span
+              className="text-xs font-semibold"
+              style={{ color: "var(--primary-light)" }}
+            >
+              {STEP_META[step]?.label}
+            </span>
+          </div>
+          <div className="progress-track">
+            <div
+              className="progress-fill"
+              style={{ width: `${((effectiveStep + 1) / totalSteps) * 100}%` }}
+            />
           </div>
         </div>
       )}
 
-      {/* Content with fade transition */}
+      {/* ── Main content ── */}
       <div
         className={clsx(
           "transition-all duration-150",
-          animating ? "opacity-0 translate-y-2" : "opacity-100 translate-y-0"
+          animating ? "opacity-0 translate-y-3" : "opacity-100 translate-y-0"
         )}
       >
         {step === 0 && (
